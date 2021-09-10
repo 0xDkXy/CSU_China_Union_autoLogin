@@ -7,9 +7,11 @@ import traceback
 import logging
 
 
+urlconn = requests.models.Response
+
 class auto_login():
     __connect = requests.Session()
-    __check_connect_url = 'https://cn.bing.com'
+    __check_connect_url = 'http://www.baidu.com'
     __url_list = []
     __status = int
     __urlptr = 0
@@ -27,13 +29,15 @@ class auto_login():
         flag = 0
         while flag == 0:
             try:
-                temp = requests.get(self.__check_connect_url)
-                self.__status = temp.status_code
+                urlconn = requests.get(url=self.__check_connect_url,timeout = 5)
+                # if urlconn.url == "http://119.39.119.2"
+                self.__status = urlconn.status_code
                 flag = 1
             except Exception as exc:
+                urlconn.close()
                 continue
             finally:
-                temp.close()
+                urlconn.close()
                 # raise exc
         if self.__status == 200:
             self.__url_list = get_url.get_csu_url()
@@ -50,37 +54,40 @@ class auto_login():
     def check(self):
         # self.__urlptr %= self.__urlsize
         try:
+            # test = 
             flag = 0
             while flag != 200:
                 if len(self.__url_list) == 0:
-                    test = requests.get('https://www.baidu.com')
-                    self.__url_list_flag = 0;
+                    urlconn = requests.get('http://www.baidu.com',timeout = 10)
+                    self.__url_list_flag = 0
                 else: 
-                    test = requests.get(random.choice(self.__url_list))
-                flag = test.status_code
+                    urlconn = requests.get(random.choice(self.__url_list),timeout=10)
+                flag = urlconn.status_code
+                urlconn.close()
         except Exception:
             traceback.print_exc()
+            self.__url_list = get_url.get_csu_url()
         else:
         # finally:
         #     self.__urlptr += 1
         #     self.__urlptr %= __urlsize
-            if test.url != 'http://119.39.119.2':
+            if urlconn.url != 'http://119.39.119.2':
                 # print("connected!")
                 return True
             else:
-                if test.status_code == 200:
+                if urlconn.status_code == 200:
                     logging.info("Disconnected!")
                 # print("disconnected!")
                 else:
                     logging.error(test.url+' '+str(test.status_code))
                 return False
-        finally:
-            test.close()
+        # finally:
+        #     test.close()
 
     def login(self):
         # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + " Try Reconnect!")
         logging.info('Try Login!')
-        post_test = 'http://119.39.119.2'
+        post_test = 'http://119.39.119.2/a70.htm'
         # print("Try login")
         post_header = {
             'Host': '119.39.119.2',
@@ -113,18 +120,22 @@ class auto_login():
                         ]
         post_header['User-Agent'] = random.choice(user_agent_list)
         login = requests.Session()
-        # login_get = login.get(url=post_test,headers=post_header)
+        login_get = login.get(url=post_test,timeout=20)
         # print("get_status_code:{}".format(login_get.status_code))
 
         post_data = {
-            'DDDDD': '你的账号',
-            'upass': '你的密码',
+            'DDDDD': '', # 填账户
+            'upass': '', #填密码
             'R1': '0',
             'R3': '0',
             'R6': '0',
             'para': '00',
             '0MKKey': '123456'
         }
+        if post_data['DDDDD'] == '':
+            logging.error("账号错误!")
+        if post_data['upass'] == '':
+            logging.error('密码错误!')
 
         login_post = login.post(url=post_test, headers=post_header, data=post_data)
         # print("post_status_code:{}".format(login_post.status_code))
@@ -137,17 +148,28 @@ class auto_login():
         # print("status_code:{}".format(login.status_code));
         else:
             logging.info('failed!')
+        login_post.close()
+        login_get.close()
         login.close()
+
+    def __update_list(self):
+        self.__url_list = get_url.get_csu_url()
 
     def start(self):
         # self.printNowTime()
         logging.info('Start!')
+        time_st=time.time()
         while True:
             if self.check() == True:
                 logging.info('Connected!')
-                time.sleep(5)
+                if time.time() - time_st >= 3600.0:
+                    self.__update_list()
+                # time.sleep(5)
             else:
-                self.login()
+                try:
+                    self.login()
+                except Exception:
+                    traceback.print_exc()
 
 
 def main():
