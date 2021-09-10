@@ -117,8 +117,8 @@ class auto_login():
         # print("get_status_code:{}".format(login_get.status_code))
 
         post_data = {
-            'DDDDD': '028208191008@zndx',
-            'upass': '47352089',
+            'DDDDD': '你的账号',
+            'upass': '你的密码',
             'R1': '0',
             'R3': '0',
             'R6': '0',
@@ -152,7 +152,7 @@ class auto_login():
 
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     autologin = auto_login()
     autologin.start()
 
