@@ -1,0 +1,2 @@
+# CSU_China_Union_autoLogin
+中南大学联通掉线自动重连脚本
