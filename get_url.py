@@ -2,12 +2,20 @@ import requests
 import re
 import logging
 import random
+import traceback
 
+header_close = {"Connection":"close"}
 
 def get_csu_url():
-    a=requests.get(url='http://www.csu.edu.cn/xyxk1/ejxy.htm',timeout=10)
-    a.close()
     obj=[]
+    try:
+        a=requests.get(url='http://www.csu.edu.cn/xyxk1/ejxy.htm',timeout=10)
+        a.close()
+    except Exception:
+        # logging.error(traceback.format_exc)
+        traceback.print_exc()
+        return obj
+    # a.close()
     obj.append('http://www.csu.edu.cn')
     obj=re.findall(r'http://.*?\.csu\.edu\.cn',a.text)
     obj=obj[:-2]
