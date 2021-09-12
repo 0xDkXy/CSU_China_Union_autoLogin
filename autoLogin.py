@@ -34,7 +34,7 @@ class auto_login():
         while flag == 0:
             try:
                 urlconn = requests.get(
-                    url=self.__check_connect_url, timeout=5, headers=header_close)
+                    url=self.__check_connect_url, timeout=10, headers=header_close)
                 # if urlconn.url == "http://119.39.119.2"
                 self.__status = urlconn.status_code
                 flag = 1
@@ -64,13 +64,15 @@ class auto_login():
         temp_flag = 0
         for url in self.__url_list:
             try:
-                conn = requests.get(url=url, timeout=5,headers = header_close)
+                conn = requests.get(url=url, timeout=10,headers = header_close)
                 if conn.status_code == 200 and conn.url != 'http://119.39.119.2':
                     temp_flag = 1
                 # conn.close()
-            except Exception:
-                logging.info(traceback.format_exc())
+            except TimeoutError:
+                logging.exception("timeout ! in line 67 conn = requests.get")
                 # conn.close()
+            except Exception:
+                logging.exception(traceback.format_exc())
         if temp_flag == 1:
             return True
         else:
@@ -162,7 +164,7 @@ class auto_login():
                 if time.time() - time_st >= 3600.0:
                     self.__update_list()
                     logging.info("update url_list!")
-                time.sleep(5)
+                time.sleep(10)
             else:
                 try:
                     self.login()
