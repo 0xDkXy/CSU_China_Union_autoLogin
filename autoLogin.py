@@ -136,8 +136,8 @@ class auto_login():
         # print("get_status_code:{}".format(login_get.status_code))
 
         post_data = {
-            'DDDDD': '', # 填账户
-            'upass': '', #填密码
+            'DDDDD': '028208191008@zndx', # 填账户
+            'upass': '47352089', #填密码
             'R1': '0',
             'R3': '0',
             'R6': '0',
