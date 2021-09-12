@@ -10,7 +10,8 @@ import logging
 urlconn = requests.models.Response
 
 
-header_close = {'Connection':"close"}
+header_close = {'Connection': "close"}
+
 
 class auto_login():
     __connect = requests.Session()
@@ -20,7 +21,7 @@ class auto_login():
     __urlptr = 0
     __urlsize = int
     __loginUrl = 'http://119.39.119.2'
-    __url_list_flag = 1
+    __url_list_flag = 0
 
     def getTime3(self):
         return time.localtime(time.time())[3]
@@ -32,7 +33,8 @@ class auto_login():
         flag = 0
         while flag == 0:
             try:
-                urlconn = requests.get(url=self.__check_connect_url,timeout = 5, headers = header_close)
+                urlconn = requests.get(
+                    url=self.__check_connect_url, timeout=5, headers=header_close)
                 # if urlconn.url == "http://119.39.119.2"
                 self.__status = urlconn.status_code
                 flag = 1
@@ -58,43 +60,21 @@ class auto_login():
 
     def check(self):
         # self.__urlptr %= self.__urlsize
-        try:
-            # test = 
-            flag = 0
-            while flag != 200:
-                if len(self.__url_list) == 0:
-                    # urlconn = requests.get('http://www.baidu.com',timeout = 10, headers = header_close)
-                    self.__url_list_flag = 0
-                    logging.info("Disconnected!")
-                    return False
-                else:
-                    try:
-                        urlconn = requests.get(random.choice(self.__url_list),timeout=10,headers = header_close)
-                    except Exception:
-                        traceback.print_exc()
-                    else:
-                        flag = urlconn.status_code
-                
-                # urlconn.close()
-        except Exception:
-            traceback.print_exc()
-            self.__url_list = get_url.get_csu_url()
+        # test =
+        temp_flag = 0
+        for url in self.__url_list:
+            try:
+                conn = requests.get(url, timeout=2)
+                if conn.status_code == 200 and conn.url != 'http://119.39.119.2':
+                    temp_flag = 1
+                conn.close()
+            except Exception:
+                logging.info(traceback.format_exc())
+                conn.close()
+        if temp_flag == 1:
+            return True
         else:
-        # finally:
-        #     self.__urlptr += 1
-        #     self.__urlptr %= __urlsize
-            if urlconn.url != 'http://119.39.119.2':
-                # print("connected!")
-                return True
-            else:
-                if urlconn.status_code == 200:
-                    logging.info("Disconnected!")
-                # print("disconnected!")
-                else:
-                    logging.error(urlconn.url+' '+str(urlconn.status_code))
-                return False
-        # finally:
-        #     test.close()
+            return False
 
     def login(self):
         # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + " Try Reconnect!")
@@ -122,22 +102,22 @@ class auto_login():
             # 'Content-length': '4036',
         }
         user_agent_list = ["Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36",
-                        "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36",
-                        "Mozilla/5.0 (Windows NT 10.0; …) Gecko/20100101 Firefox/61.0",
-                        "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36",
-                        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
-                        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36",
-                        "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
-                        "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15",
-                        ]
+                           "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36",
+                           "Mozilla/5.0 (Windows NT 10.0; …) Gecko/20100101 Firefox/61.0",
+                           "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36",
+                           "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
+                           "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36",
+                           "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+                           "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15",
+                           ]
         post_header['User-Agent'] = random.choice(user_agent_list)
         login = requests.Session()
-        login_get = login.get(url=post_test,timeout=20)
+        login_get = login.get(url=post_test, timeout=20)
         # print("get_status_code:{}".format(login_get.status_code))
 
         post_data = {
-            'DDDDD': '028208191008@zndx', # 填账户
-            'upass': '47352089', #填密码
+            'DDDDD': '',  # 填账户
+            'upass': '',  # 填密码
             'R1': '0',
             'R3': '0',
             'R6': '0',
@@ -151,15 +131,17 @@ class auto_login():
             logging.error('密码错误!')
             return
 
-        login_post = login.post(url=post_test, headers=post_header, data=post_data)
+        login_post = login.post(
+            url=post_test, headers=post_header, data=post_data)
         checkFlag = login_post.headers["Content-length"]
         # print("post_status_code:{}".format(login_post.status_code))
         if login_post.status_code == 200 and checkFlag == '4036':
             # print("Connected!")
             logging.info('Succeed!')
+            self.__url_list_flag = len(self.__url_list)
             if self.__url_list_flag == 0:
                 self.__url_list = get_url.get_csu_url()
-                self.__url_list_flag = 1
+                self.__url_list_flag = len(self.__url_list)
         # print("status_code:{}".format(login.status_code));
         else:
             logging.info('failed!')
@@ -173,14 +155,14 @@ class auto_login():
     def start(self):
         # self.printNowTime()
         logging.info('Start!')
-        time_st=time.time()
+        time_st = time.time()
         while True:
             if self.check() == True:
                 logging.info('Connected!')
                 if time.time() - time_st >= 3600.0:
                     self.__update_list()
                     logging.info("update url_list!")
-                # time.sleep(5)
+                time.sleep(5)
             else:
                 try:
                     self.login()
@@ -200,4 +182,3 @@ if __name__ == "__main__":
 
 
 # Content-length: 3494
-
