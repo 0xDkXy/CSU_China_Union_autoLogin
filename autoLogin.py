@@ -190,7 +190,7 @@ class auto_login():
 
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     autologin = auto_login()
     autologin.start()
 
