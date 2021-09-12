@@ -64,13 +64,13 @@ class auto_login():
         temp_flag = 0
         for url in self.__url_list:
             try:
-                conn = requests.get(url, timeout=2)
+                conn = requests.get(url=url, timeout=5,headers = header_close)
                 if conn.status_code == 200 and conn.url != 'http://119.39.119.2':
                     temp_flag = 1
-                conn.close()
+                # conn.close()
             except Exception:
                 logging.info(traceback.format_exc())
-                conn.close()
+                # conn.close()
         if temp_flag == 1:
             return True
         else:
@@ -172,7 +172,7 @@ class auto_login():
 
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     autologin = auto_login()
     autologin.start()
 
