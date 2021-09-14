@@ -3,3 +3,4 @@
 autoLogin_old.py
 *.txt
 /__pycache__
+!requirements.txt
