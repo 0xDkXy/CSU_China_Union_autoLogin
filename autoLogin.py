@@ -172,6 +172,7 @@ class auto_login():
         del login_post
         del login
         gc.collect()
+        time.sleep(2)
 
     def __update_list(self):
         self.__url_list = get_url.get_csu_url()
