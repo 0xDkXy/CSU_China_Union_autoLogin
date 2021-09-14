@@ -44,9 +44,9 @@ class auto_login():
                 logging.warn(self.__check_connect_url + ' timeout')
                 self.__status = 0
                 break
-            # finally:
-                # urlconn.close()
-                # raise exc
+            finally:
+                del urlconn
+                gc.collect()
         if self.__status == 200:
             self.__url_list = get_url.get_csu_url()
             self.__urlsize = len(self.__url_list)
@@ -65,16 +65,25 @@ class auto_login():
         temp_flag = 0
         for url in self.__url_list:
             try:
-                conn = requests.get(url=url, timeout=10,headers = header_close)
+                conn = requests.get(url=url, timeout=5,headers = header_close)
                 if conn.status_code == 200 and conn.url != 'http://119.39.119.2':
                     temp_flag = 1
+                    break
                 del conn
                 gc.collect()
                 # conn.close()
             except TimeoutError:
-                logging.exception("timeout ! in line 67 conn = requests.get")
+                logging.exception("TimeoutError! in line 67 conn = requests.get [{}]".format(url))
                 logging.debug(traceback.format_exc())
                 # conn.close()
+            except requests.ConnectTimeout:
+                logging.exception("ConnectTimeout! in line 67 conn = requests.get [{}]".format(url))
+                logging.debug(traceback.format_exc())
+                self.__url_list.remove(url)
+            except requests.ReadTimeout:
+                logging.exception("ReadTimeout! in line 67 conn = requests.get [{}]".format(url))
+                logging.debug(traceback.format_exc())
+                self.__url_list.remove(url)
             except Exception:
                 logging.exception("Exception in check!")
                 logging.debug(traceback.format_exc())
@@ -185,7 +194,7 @@ class auto_login():
 
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     autologin = auto_login()
     autologin.start()
 
