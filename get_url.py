@@ -14,7 +14,7 @@ def get_csu_url():
         a.close()
     except Exception:
         # logging.error(traceback.format_exc)
-        logging.exception("Exception in get_csu_url!")
+        logging.info("Exception in get_csu_url!")
         logging.debug(traceback.format_exc())
         return obj
     # a.close()

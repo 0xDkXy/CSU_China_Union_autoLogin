@@ -72,20 +72,24 @@ class auto_login():
                 del conn
                 gc.collect()
                 # conn.close()
+            except socket.timeout:
+                logging.info("Timeout! in line 67 conn = requests.get [{}]".format(url))
+                logging.debug(traceback.format_exc())
+                self.__url_list.remove(url)
             except TimeoutError:
-                logging.exception("TimeoutError! in line 67 conn = requests.get [{}]".format(url))
+                logging.info("TimeoutError! in line 67 conn = requests.get [{}]".format(url))
                 logging.debug(traceback.format_exc())
                 # conn.close()
             except requests.ConnectTimeout:
-                logging.exception("ConnectTimeout! in line 67 conn = requests.get [{}]".format(url))
+                logging.info("ConnectTimeout! in line 67 conn = requests.get [{}]".format(url))
                 logging.debug(traceback.format_exc())
                 self.__url_list.remove(url)
             except requests.ReadTimeout:
-                logging.exception("ReadTimeout! in line 67 conn = requests.get [{}]".format(url))
+                logging.info("ReadTimeout! in line 67 conn = requests.get [{}]".format(url))
                 logging.debug(traceback.format_exc())
                 self.__url_list.remove(url)
             except Exception:
-                logging.exception("Exception in check!")
+                logging.info("Exception in check!")
                 logging.debug(traceback.format_exc())
         if temp_flag == 1:
             return True
