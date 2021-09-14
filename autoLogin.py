@@ -5,6 +5,7 @@ import random
 import get_url
 import traceback
 import logging
+import gc
 
 
 urlconn = requests.models.Response
@@ -67,12 +68,16 @@ class auto_login():
                 conn = requests.get(url=url, timeout=10,headers = header_close)
                 if conn.status_code == 200 and conn.url != 'http://119.39.119.2':
                     temp_flag = 1
+                del conn
+                gc.collect()
                 # conn.close()
             except TimeoutError:
                 logging.exception("timeout ! in line 67 conn = requests.get")
+                logging.debug(traceback.format_exc())
                 # conn.close()
             except Exception:
-                logging.exception(traceback.format_exc())
+                logging.exception("Exception in check!")
+                logging.debug(traceback.format_exc())
         if temp_flag == 1:
             return True
         else:
@@ -150,6 +155,10 @@ class auto_login():
         login_post.close()
         login_get.close()
         login.close()
+        del login_get
+        del login_post
+        del login
+        gc.collect()
 
     def __update_list(self):
         self.__url_list = get_url.get_csu_url()
@@ -169,12 +178,14 @@ class auto_login():
                 try:
                     self.login()
                 except Exception:
-                    traceback.print_exc()
+                    logging.info("Exception in start!")
+                    logging.debug(traceback.format_exc())
+            gc.collect()
 
 
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     autologin = auto_login()
     autologin.start()
 

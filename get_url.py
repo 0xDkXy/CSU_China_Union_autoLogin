@@ -3,6 +3,7 @@ import re
 import logging
 import random
 import traceback
+import gc
 
 header_close = {"Connection":"close"}
 
@@ -13,7 +14,8 @@ def get_csu_url():
         a.close()
     except Exception:
         # logging.error(traceback.format_exc)
-        traceback.print_exc()
+        logging.exception("Exception in get_csu_url!")
+        logging.debug(traceback.format_exc())
         return obj
     # a.close()
     obj.append('http://www.csu.edu.cn')
@@ -21,6 +23,9 @@ def get_csu_url():
     obj=obj[:-2]
     random.shuffle(obj)
     res=obj[:10]
+    del a
+    del obj
+    gc.collect()
     return res
 
 
