@@ -205,11 +205,12 @@ def main():
         try:
             autologin = auto_login()
             autologin.start()
+            del autologin
         except Exception:
             logging.info("Exception in main!")
             logging.debug(traceback.format_exc())
         finally:
-            del autologin
+            # del autologin
             gc.collect()
             os.system("echo > ./log.txt")
 
