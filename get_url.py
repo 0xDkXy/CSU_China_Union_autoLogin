@@ -16,6 +16,8 @@ def get_csu_url():
         # logging.error(traceback.format_exc)
         logging.info("Exception in get_csu_url!")
         logging.debug(traceback.format_exc())
+        obj.append("http://www.baidu.com")
+        del a
         return obj
     # a.close()
     obj.append('http://www.csu.edu.cn')

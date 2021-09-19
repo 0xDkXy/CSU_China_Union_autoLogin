@@ -6,6 +6,7 @@ import get_url
 import traceback
 import logging
 import gc
+import os
 
 
 urlconn = requests.models.Response
@@ -185,9 +186,9 @@ class auto_login():
             if self.check() == True:
                 logging.info('Connected!')
                 if time.time() - time_st >= 3600.0:
-                    self.__update_list()
-                    logging.info("update url_list!")
-                time.sleep(10)
+                    logging.info("Exit!")
+                    break
+                time.sleep(random.randint(1,60))
             else:
                 try:
                     self.login()
@@ -200,8 +201,17 @@ class auto_login():
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
     logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
-    autologin = auto_login()
-    autologin.start()
+    while True :
+        try:
+            autologin = auto_login()
+            autologin.start()
+        except Exception:
+            logging.info("Exception in main!")
+            logging.debug(traceback.format_exc())
+        finally:
+            del autologin
+            gc.collect()
+            os.system("echo > ./log.txt")
 
 
 if __name__ == "__main__":
