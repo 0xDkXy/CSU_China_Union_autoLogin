@@ -4,4 +4,4 @@ autoLogin_old.py
 *.txt
 /__pycache__
 !requirements.txt
-get_url.py
+*temp*
