@@ -9,93 +9,53 @@ import gc
 import os
 
 
-urlconn = requests.models.Response
+# urlconn = requests.models.Response
 
 
-header_close = {'Connection': "close"}
+header_close = {'Connection': 'keep-alive'}
 
 
-class auto_login():
-    __connect = requests.Session()
-    __check_connect_url = 'http://www.baidu.com'
-    __url_list = []
-    __status = int
-    __urlptr = 0
-    __urlsize = int
+class autoLogin():
+    __url = 'http://www.baidu.com'
+    __status = -1
     __loginUrl = 'http://119.39.119.2'
-    __url_list_flag = 0
+    __initFlag = False
 
     def getTime3(self):
         return time.localtime(time.time())[3]
 
+    def isInit(self) -> bool:
+        return self.__initFlag
     # def printNowTime(self):
     #     print(time.strftime("%Y-%m-%d %H:%M:%S :", time.localtime()),end=' ')
 
+    def __del__(self):
+        del self.__session
+        logging.warning("Object autoLogin deleted!")
+
     def __init__(self):
-        flag = 0
-        while flag == 0:
-            try:
-                urlconn = requests.get(
-                    url=self.__check_connect_url, timeout=10, headers=header_close)
-                # if urlconn.url == "http://119.39.119.2"
-                self.__status = urlconn.status_code
-                flag = 1
-            except Exception as exc:
-                # urlconn.close()
-                logging.warn(self.__check_connect_url + ' timeout')
-                self.__status = 0
-                break
-            finally:
-                del urlconn
-                gc.collect()
-        if self.__status == 200:
-            self.__url_list = get_url.get_csu_url()
-            self.__urlsize = len(self.__url_list)
-            logging.info(str(self.__urlsize))
-            logging.info(str(self.__url_list))
+        self.__status = -1
+        self.__initFlag = False
+        self.__session = requests.session()
 
-    def is_connected(self):
-        if self.__status == 200:
-            return True
-        else:
-            return False
-
-    def check(self):
+    def check(self)->bool:
         # self.__urlptr %= self.__urlsize
         # test =
-        temp_flag = 0
-        for url in self.__url_list:
-            try:
-                conn = requests.get(url=url, timeout=5,headers = header_close)
-                if conn.status_code == 200 and conn.url != 'http://119.39.119.2':
-                    temp_flag = 1
-                    break
-                del conn
-                gc.collect()
-                # conn.close()
-            except socket.timeout:
-                logging.info("Timeout! in line 67 conn = requests.get [{}]".format(url))
-                logging.debug(traceback.format_exc())
-                self.__url_list.remove(url)
-            except TimeoutError:
-                logging.info("TimeoutError! in line 67 conn = requests.get [{}]".format(url))
-                logging.debug(traceback.format_exc())
-                # conn.close()
-            except requests.ConnectTimeout:
-                logging.info("ConnectTimeout! in line 67 conn = requests.get [{}]".format(url))
-                logging.debug(traceback.format_exc())
-                self.__url_list.remove(url)
-            except requests.ReadTimeout:
-                logging.info("ReadTimeout! in line 67 conn = requests.get [{}]".format(url))
-                logging.debug(traceback.format_exc())
-                self.__url_list.remove(url)
-            except Exception:
-                logging.info("Exception in check!")
-                logging.debug(traceback.format_exc())
-        if temp_flag == 1:
-            return True
-        else:
-            return False
+        returnVal = False
+        try:
+            Connection = self.__session.get(
+                url=self.__url, timeout=5, headers=header_close)
+            if Connection.status_code == 200 and Connection.url != 'http://119.39.119.2':
+                del Connection
+                returnVal = True
+            else:
+                del Connection
+                # returnVal = False
+        except:
+            logging.warning(traceback.format_exc())
+        finally:
+            gc.collect()
+            return returnVal
 
     def login(self):
         # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + " Try Reconnect!")
@@ -132,13 +92,9 @@ class auto_login():
                            "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15",
                            ]
         post_header['User-Agent'] = random.choice(user_agent_list)
-        login = requests.Session()
-        login_get = login.get(url=post_test, timeout=20)
-        # print("get_status_code:{}".format(login_get.status_code))
-
         post_data = {
-            'DDDDD': '',  # 填账户
-            'upass': '',  # 填密码
+            'DDDDD': '028208191008@zndx',  # 填账户
+            'upass': '47352089',  # 填密码
             'R1': '0',
             'R3': '0',
             'R6': '0',
@@ -146,77 +102,65 @@ class auto_login():
             '0MKKey': '123456'
         }
         if post_data['DDDDD'] == '':
-            logging.error("账号错误!")
-            return
+            logging.error("Wrong UserName!")
+            exit()
         if post_data['upass'] == '':
-            logging.error('密码错误!')
-            return
+            logging.error('Wrong Password!')
+            exit()
+        while True:
+            try:
+                # loginGet = requests.get(url=post_test, timeout=20)
+                loginPost = self.__session.post(
+                url=post_test, headers=post_header, data=post_data,timeout=10)
+                checkFlag = loginPost.headers["Content-length"]
+                if loginPost.status_code == 200 and checkFlag == '4036':
+                    logging.info('Login Succeed!')
+                else:
+                    logging.info('Login Failed!')
+                # del loginGet
+                del loginPost
+                break
+            except:
+                logging.warning(traceback.format_exc())
+            time.sleep(1)
 
-        login_post = login.post(
-            url=post_test, headers=post_header, data=post_data)
-        checkFlag = login_post.headers["Content-length"]
-        # print("post_status_code:{}".format(login_post.status_code))
-        if login_post.status_code == 200 and checkFlag == '4036':
-            # print("Connected!")
-            logging.info('Succeed!')
-            self.__url_list_flag = len(self.__url_list)
-            if self.__url_list_flag == 0:
-                self.__url_list = get_url.get_csu_url()
-                self.__url_list_flag = len(self.__url_list)
-        # print("status_code:{}".format(login.status_code));
-        else:
-            logging.info('failed!')
-        login_post.close()
-        login_get.close()
-        login.close()
-        del login_get
-        del login_post
-        del login
-        gc.collect()
-        time.sleep(2)
-
-    def __update_list(self):
-        self.__url_list = get_url.get_csu_url()
-
-    def start(self):
+    def run(self):
         # self.printNowTime()
-        logging.info('Start!')
+        logging.info('Start Running!')
         time_st = time.time()
         while True:
             if self.check() == True:
                 logging.info('Connected!')
-                if time.time() - time_st >= 3600.0:
-                    logging.info("Exit!")
-                    break
-                time.sleep(random.randint(1,60))
+                sleepTime = random.randint(10, 60)
+                logging.info(f'Sleep Time : {sleepTime}')
+                time.sleep(sleepTime)
             else:
                 try:
                     self.login()
                 except Exception:
-                    logging.info("Exception in start!")
-                    logging.debug(traceback.format_exc())
+                    # logging.info("Exception in start!")
+                    logging.warning(traceback.format_exc())
+                finally:
+                    time.sleep(random.randint(0, 10))
             gc.collect()
+            if time.time() - time_st >= 3600.0:
+                logging.info("Exit Run!")
+                break
 
 
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
-    while True :
+    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+    while True:
         try:
-            autologin = auto_login()
-            autologin.start()
+            autologin = autoLogin()
+            autologin.run()
             del autologin
         except Exception:
-            logging.info("Exception in main!")
-            logging.debug(traceback.format_exc())
+            logging.warning(traceback.format_exc())
         finally:
-            # del autologin
             gc.collect()
-            os.system("echo > ./log.txt")
 
 
 if __name__ == "__main__":
     main()
-
-
-# Content-length: 3494
