@@ -1,16 +1,9 @@
 import requests
 import time
-import socket
 import random
-import get_url
 import traceback
 import logging
 import gc
-import os
-
-
-# urlconn = requests.models.Response
-
 
 header_close = {'Connection': 'keep-alive'}
 
@@ -93,8 +86,8 @@ class autoLogin():
                            ]
         post_header['User-Agent'] = random.choice(user_agent_list)
         post_data = {
-            'DDDDD': '028208191008@zndx',  # 填账户
-            'upass': '47352089',  # 填密码
+            'DDDDD': '',  # 填账户
+            'upass': '',  # 填密码
             'R1': '0',
             'R3': '0',
             'R6': '0',
