@@ -121,12 +121,12 @@ class autoLogin():
         # self.printNowTime()
         logging.info('Start Running!')
         time_st = time.time()
-        while True:
+        for _ in range(1):
             if self.check() == True:
                 logging.info('Connected!')
                 sleepTime = random.randint(10, 60)
                 logging.info(f'Sleep Time : {sleepTime}')
-                time.sleep(sleepTime)
+                # time.sleep(sleepTime)
             else:
                 try:
                     self.login()
@@ -134,7 +134,8 @@ class autoLogin():
                     # logging.info("Exception in start!")
                     logging.warning(traceback.format_exc())
                 finally:
-                    time.sleep(random.randint(0, 10))
+                    # time.sleep(random.randint(0, 10))
+                    pass
             gc.collect()
             if time.time() - time_st >= 3600.0:
                 logging.info("Exit Run!")
@@ -144,7 +145,7 @@ class autoLogin():
 def main():
     LOG_FORMAT = "[%(asctime)s] - [%(levelname)s] - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
-    while True:
+    for _ in range(1):
         try:
             autologin = autoLogin()
             autologin.run()
