@@ -3,13 +3,14 @@ import time
 import random
 import traceback
 import logging
+import os
 import gc
 
 header_close = {'Connection': 'keep-alive'}
 
 
 class autoLogin():
-    __url = 'http://www.baidu.com'
+    __url = ['http://www.baidu.com','http://cn.bing.com']
     __status = -1
     __loginUrl = 'http://119.39.119.2'
     __initFlag = False
@@ -31,16 +32,14 @@ class autoLogin():
         self.__initFlag = False
         self.__session = requests.session()
 
-    def check(self)->bool:
-        # self.__urlptr %= self.__urlsize
-        # test =
-        returnVal = False
+    def check(self) -> bool:
+        returnVal = True
         try:
             Connection = self.__session.get(
                 url=self.__url, timeout=5, headers=header_close)
-            if Connection.status_code == 200 and Connection.url != 'http://119.39.119.2':
+            if Connection.url == 'http://119.39.119.2':
                 del Connection
-                returnVal = True
+                returnVal = False
             else:
                 del Connection
                 # returnVal = False
@@ -51,7 +50,13 @@ class autoLogin():
             return returnVal
 
     def login(self):
-        # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + " Try Reconnect!")
+        try:
+            Connection = self.__session.get(url=self.__url[random.randint(0,1)],timeout=5, headers=header_close)
+            if Connection.url != 'http://119.39.119.2':
+                return
+        except:
+            logging.warning(traceback.format_exc())
+            return
         logging.info('Try Login!')
         post_test = 'http://119.39.119.2/a70.htm'
         # print("Try login")
@@ -100,46 +105,25 @@ class autoLogin():
         if post_data['upass'] == '':
             logging.error('Wrong Password!')
             exit()
-        while True:
-            try:
-                # loginGet = requests.get(url=post_test, timeout=20)
-                loginPost = self.__session.post(
-                url=post_test, headers=post_header, data=post_data,timeout=10)
-                checkFlag = loginPost.headers["Content-length"]
-                if loginPost.status_code == 200 and checkFlag == '4036':
-                    logging.info('Login Succeed!')
-                else:
-                    logging.info('Login Failed!')
-                # del loginGet
-                del loginPost
-                break
-            except:
-                logging.warning(traceback.format_exc())
-            time.sleep(1)
+        try:
+            loginPost = self.__session.post(
+            url=post_test, headers=post_header, data=post_data, timeout=10)
+            checkFlag = loginPost.headers["Content-length"]
+            if loginPost.status_code == 200 and checkFlag == '4036':
+                logging.info('Login Succeed!')
+            else:
+                logging.info('Login Failed!')
+                if 3000 <= checkFlag <= 4000 :
+                    logging.warning("Reboot!")
+                    os.system("reboot")
+            del loginPost
+        except:
+            logging.warning(traceback.format_exc())
 
     def run(self):
         # self.printNowTime()
         logging.info('Start Running!')
-        time_st = time.time()
-        for _ in range(1):
-            if self.check() == True:
-                logging.info('Connected!')
-                sleepTime = random.randint(10, 60)
-                logging.info(f'Sleep Time : {sleepTime}')
-                # time.sleep(sleepTime)
-            else:
-                try:
-                    self.login()
-                except Exception:
-                    # logging.info("Exception in start!")
-                    logging.warning(traceback.format_exc())
-                finally:
-                    # time.sleep(random.randint(0, 10))
-                    pass
-            gc.collect()
-            if time.time() - time_st >= 3600.0:
-                logging.info("Exit Run!")
-                break
+        
 
 
 def main():
