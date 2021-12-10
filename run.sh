@@ -1,4 +1,11 @@
 #!/bin/bash
 WorkPath='/root/CSU_China_Union_autoLogin/'
 cd $WorkPath
-python3 -u ./autoLogin.py >> ./log.txt 2 >> \&1 \&  
+logDir=`date +"+%Y-%m-%d"`
+if [ -e $logDir ]
+then
+    :
+else
+    mkdir $logDir
+fi
+python3 -u ./autoLogin.py &>>./$logDir/log_`date +%H`.txt
